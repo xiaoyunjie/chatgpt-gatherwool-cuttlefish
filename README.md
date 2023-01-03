@@ -1,2 +1,2 @@
 # chatgpt-gatherwool-cuttlefish
-gather wool for cuttlefish
+Gather the wool from the cuttlefish
