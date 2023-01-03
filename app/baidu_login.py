@@ -13,7 +13,7 @@ from getpass import getpass
 
 import requests
 
-from util import *
+from app.util import *
 
 if sys.version_info < (3, 0):
     input = raw_input
