@@ -12,9 +12,9 @@ openai.api_key = "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"
 
 # Use the ChatGPT model to generate a response to a prompt
 response = openai.Completion.create(
-    engine="text-davinci-002",
-    prompt="What's your name?",
-    max_tokens=1024,
+    model="text-davinci-003",
+    prompt="告诫人们居安思危的诗句",
+    max_tokens=4000,
     temperature=0.7,
     top_p=1,
     frequency_penalty=0,

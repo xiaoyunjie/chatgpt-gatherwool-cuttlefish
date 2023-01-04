@@ -1,4 +1,4 @@
 requests>=2.20.0
-pycryptodome>=3.6.6
 openai~=0.25.0
 decryptlogin~=0.3.9
+backoff~=2.2.1
