@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.docx
+task_name.json
 # C extensions
 *.so
 

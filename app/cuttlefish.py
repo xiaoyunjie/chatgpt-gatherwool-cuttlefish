@@ -187,7 +187,7 @@ class Gater_wool:
         path = f'../file/{classification}/{time.strftime("%Y-%m-%d")}/'
         filename = f'{title}.docx'
         if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         document.save(path + filename)
 
     @backoff.on_exception(backoff.expo, openai.error.RateLimitError)
@@ -200,7 +200,7 @@ class Gater_wool:
             for name in value:
                 s_name = str(name)
                 prompt = f'以 {s_name} 为题，写一篇500到800字的文章'
-                logging('【%s】 文章生成任务---开始' % prompt)
+                logging('第 %s 篇，【%s】 文章生成任务---开始' % (num, prompt))
                 try:
                     # Use the ChatGPT model to generate a response to a prompt
                     response = openai.Completion.create(
@@ -213,9 +213,8 @@ class Gater_wool:
                         presence_penalty=0
                     )
                     content = response.choices[0].text
-                    logging('【%s】文章内容生成---已完成' % s_name)
                     self.write_to_docx(classification=classification, title=s_name, content=content)
-                    logging('【%s】docx文档生成---已完成' % s_name)
+                    logging('第 %s 篇，【%s】docx文档---已生成' % (num, s_name))
                     time.sleep(30)
                 except Exception as e:
                     logging('openai接口异常: %s' % e)
