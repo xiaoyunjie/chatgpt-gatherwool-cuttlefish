@@ -10,10 +10,14 @@ import openai
 # Set your API key
 openai.api_key = "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"
 
+name: str = '招聘感想'
+
+prompt = f'以 {name} 为题，写一篇500到800字的文章'
+
 # Use the ChatGPT model to generate a response to a prompt
 response = openai.Completion.create(
     model="text-davinci-003",
-    prompt="告诫人们居安思危的诗句",
+    prompt=prompt,
     max_tokens=4000,
     temperature=0.7,
     top_p=1,
