@@ -23,7 +23,7 @@ cid_name: dict = {0: '学前教育', 1: '基础教育', 2: '高校与高等教�
                   9: '商品说明书', 10: '实用模板', 11: '生活娱乐'}
 
 # Set your API key
-openai.api_key = "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"
+openai.api_key = "xxxxxxxxxxxxxxxx"
 
 
 def logging(msg, tip='INFO'):
