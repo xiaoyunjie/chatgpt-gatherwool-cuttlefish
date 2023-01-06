@@ -7,6 +7,7 @@
 
 
 import argparse
+import re
 import time
 import os
 import json
@@ -62,7 +63,7 @@ class Gater_wool:
     """
 
     def __init__(self):
-        self.sum = 200  # 每天api接口调用上线
+        self.sum = 300  # 每天api接口调用上线
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -70,6 +71,7 @@ class Gater_wool:
             'Accept': '*/*'
         }
 
+    @property
     def get_task(self):
         """
         获取墨斗鱼任务列表
@@ -103,7 +105,13 @@ class Gater_wool:
                         # 从响应内容中获取任务名
                         for i in t_response_json['data']['queryList']:
                             if int(i['status']) == 1:
-                                task_name.append(i['queryName'])
+                                t_name = str(i['queryName'])
+                                if len(i['queryName']) < 5:
+                                    logging('%s 标题长度小于5个字符---不符' % t_name)
+                                elif re.search(r"[*\"/:?\\|<>]", t_name):
+                                    logging('%s 包含特殊字符---不符' % t_name)
+                                else:
+                                    task_name.append(t_name)
 
                         # 判断是否成功
                         if t_response_json['status']['code'] == 0:
@@ -122,7 +130,7 @@ class Gater_wool:
         """
         args = parseArgs()
         if args.refresh:
-            task_info = self.get_task()
+            task_info = self.get_task
             f = open('../task/task_name.json', 'w', encoding='utf-8')
             json.dump(task_info, f, ensure_ascii=False, indent=4)
             logging('任务名刷新并写入成功!!!')
@@ -135,7 +143,7 @@ class Gater_wool:
             f.close()
             return task_info
         else:
-            task_info = self.get_task()
+            task_info = self.get_task
             f = open('../task/task_name.json', 'w', encoding='utf-8')
             json.dump(task_info, f, ensure_ascii=False, indent=4)
             logging('任务名首次写入成功!!!')
@@ -199,29 +207,46 @@ class Gater_wool:
             classification = str(key)  # 分类
             for name in value:
                 s_name = str(name)
-                prompt = f'以 {s_name} 为题，写一篇500到800字的文章'
-                logging('第 %s 篇，【%s】 文章生成任务---开始' % (num, prompt))
-                try:
-                    # Use the ChatGPT model to generate a response to a prompt
-                    response = openai.Completion.create(
-                        model="text-davinci-003",
-                        prompt=prompt,
-                        max_tokens=4000,
-                        temperature=0.7,
-                        top_p=1,
-                        frequency_penalty=0,
-                        presence_penalty=0
-                    )
-                    content = response.choices[0].text
-                    self.write_to_docx(classification=classification, title=s_name, content=content)
-                    logging('第 %s 篇，【%s】docx文档---已生成' % (num, s_name))
-                    time.sleep(30)
-                except Exception as e:
-                    logging('openai接口异常: %s' % e)
-                # 每天生成篇数限制
-                if num >= count_sum:
-                    break
-                num += 1
+                if len(s_name) < 5:
+                    logging('%s 标题长度小于5个字符---不符' % s_name)
+                elif re.search(r"[*\"/:?\\|<>]", s_name):
+                    logging('%s 包含特殊字符---不符' % s_name)
+                else:
+                    prompt = f'以 {s_name} 为题，写一篇800字的文章'
+                    logging('第 %s 篇，【%s】 文章生成任务---开始' % (num, prompt))
+                    try:
+                        # Use the ChatGPT model to generate a response to a prompt
+                        response = openai.Completion.create(
+                            model="text-davinci-003",
+                            prompt=prompt,
+                            max_tokens=4000,
+                            temperature=0.7,
+                            top_p=1,
+                            frequency_penalty=0,
+                            presence_penalty=0
+                        )
+                        content = response.choices[0].text
+                        self.write_to_docx(classification=classification, title=s_name, content=content)
+                        logging('第 %s 篇，【%s】docx文档---已生成' % (num, s_name))
+                        time.sleep(15)
+                    except Exception as e:
+                        logging('openai接口异常: %s' % e)
+                    # 每天生成篇数限制
+                    if num >= count_sum:
+                        break
+                    num += 1
+
+    # def read_test(self):
+    #     total_task_name = self.write_to_file()
+    #     for key, value in total_task_name.items():
+    #         for name in value:
+    #             s_name = str(name)
+    #             if len(s_name) < 5:
+    #                 logging('%s 标题长度小于5个字符---不符' % s_name)
+    #             elif re.search(r"[\*\"/:?\\|<>]", s_name):
+    #                 logging('%s 包含特殊字符---不符' % s_name)
+    #             else:
+    #                 print(s_name, len(s_name))
 
 
 if __name__ == '__main__':
