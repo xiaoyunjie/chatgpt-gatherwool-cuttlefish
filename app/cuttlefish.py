@@ -52,7 +52,8 @@ def parseArgs():
     :return: args
     """
     parser = argparse.ArgumentParser(description='墨斗鱼文章生成')
-    parser.add_argument('--refresh', dest='refresh', help='重新获取任务列表', action='store_true')
+    parser.add_argument('--refresh', dest='refresh', help='强制刷新任务列表', action='store_true')
+    parser.add_argument('--n', dest='cid_num', type=int, default=6, help='default=6, 分类编号: 0: 学前教育, 1: 基础教育, 2: 高校与高等教育, 3: 语言/资格考试, 4: 法律, 5: 建筑, 6: 互联网, 7: 行业资料, 8: 政务民生, 9: 商品说明书, 10: 实用模板, 11: 生活娱乐')
     args = parser.parse_args()
     return args
 
@@ -63,7 +64,7 @@ class Gater_wool:
     """
 
     def __init__(self):
-        self.sum = 300  # 每天api接口调用上线
+        self.sum = 200  # 每天api接口调用上线
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -78,7 +79,12 @@ class Gater_wool:
         :return: list
         """
         # cid_list: list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        cid_list: list = [11]
+        args = parseArgs()
+        print(args.cid_num)
+        if args.cid_num:
+            cid_list: list = [args.cid_num]
+        else:
+            cid_list: list = [6]
         pn: int = 0
         rn: int = 20
         task_name: list = []
@@ -212,7 +218,7 @@ class Gater_wool:
                 elif re.search(r"[*\"/:?\\|<>]", s_name):
                     logging('%s 包含特殊字符---不符' % s_name)
                 else:
-                    prompt = f'以 {s_name} 为题，写一篇800字的文章'
+                    prompt = f'以 {s_name} 为题，写一篇2000字的文章'
                     logging('第 %s 篇，【%s】 文章生成任务---开始' % (num, prompt))
                     try:
                         # Use the ChatGPT model to generate a response to a prompt
@@ -235,18 +241,6 @@ class Gater_wool:
                     if num >= count_sum:
                         break
                     num += 1
-
-    # def read_test(self):
-    #     total_task_name = self.write_to_file()
-    #     for key, value in total_task_name.items():
-    #         for name in value:
-    #             s_name = str(name)
-    #             if len(s_name) < 5:
-    #                 logging('%s 标题长度小于5个字符---不符' % s_name)
-    #             elif re.search(r"[\*\"/:?\\|<>]", s_name):
-    #                 logging('%s 包含特殊字符---不符' % s_name)
-    #             else:
-    #                 print(s_name, len(s_name))
 
 
 if __name__ == '__main__':
