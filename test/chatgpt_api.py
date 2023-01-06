@@ -8,11 +8,11 @@
 import openai
 
 # Set your API key
-openai.api_key = "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"
+openai.api_key = "xxxxxxxxxxxx"
 
 name: str = '招聘感想'
 
-prompt = f'以 {name} 为题，写一篇500到800字的文章'
+prompt = f'以 {name} 为题，写一篇800字的文章'
 
 # Use the ChatGPT model to generate a response to a prompt
 response = openai.Completion.create(
