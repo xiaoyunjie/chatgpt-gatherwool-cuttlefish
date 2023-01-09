@@ -20,7 +20,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 
 cid_name: dict = {0: '学前教育', 1: '基础教育', 2: '高校与高等教育', 3: '语言/资格考试', 4: '法律', 5: '建筑', 6: '互联网', 7: '行业资料', 8: '政务民生',
-                  9: '商品说明书', 10: '实用模板', 11: '生活娱乐'}
+                  9: '商品说明书', 10: '实用模板', 11: '生活娱乐', 99: '推荐'}
 
 # Set your API key
 openai.api_key = "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"
@@ -53,7 +53,8 @@ def parseArgs():
     """
     parser = argparse.ArgumentParser(description='墨斗鱼文章生成')
     parser.add_argument('--refresh', dest='refresh', help='强制刷新任务列表', action='store_true')
-    parser.add_argument('--n', dest='cid_num', type=int, default=6, help='default=6, 分类编号: 0: 学前教育, 1: 基础教育, 2: 高校与高等教育, 3: 语言/资格考试, 4: 法律, 5: 建筑, 6: 互联网, 7: 行业资料, 8: 政务民生, 9: 商品说明书, 10: 实用模板, 11: 生活娱乐')
+    parser.add_argument('--n', dest='cid_num', type=int, default=6,
+                        help='default=6, 分类编号: 0: 学前教育, 1: 基础教育, 2: 高校与高等教育, 3: 语言/资格考试, 4: 法律, 5: 建筑, 6: 互联网, 7: 行业资料, 8: 政务民生, 9: 商品说明书, 10: 实用模板, 11: 生活娱乐')
     parser.add_argument('--all', dest='all', help='分类全选', action='store_true')
     args = parser.parse_args()
     return args
@@ -82,7 +83,7 @@ class Gater_wool:
         args = parseArgs()
         if args.all:
             cid_list: list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        elif args.cid_num:
+        elif args.cid_num or int(args.cid_num == 0):
             cid_list: list = [args.cid_num]
         else:
             cid_list: list = [99]
@@ -96,10 +97,9 @@ class Gater_wool:
             response = session.get(f_url, headers=self.headers)
             response_json = response.json()
             if response_json['status']['code'] != 0:
-                logging('%s 第 %s 页，获取任务名失败, 原因: %s' % (cid_name[cid], pn, response_json.get('status')))
+                logging('%s 第 %s 页，获取任务名失败, 原因: %s' % (cid_name[cid], pn + 1, response_json.get('status')))
             else:
                 total = response_json['data']['total']
-                logging('total: %s' % total)
                 pn = int(total / rn)
                 t_pn: int = 0
                 while t_pn < pn:
@@ -115,16 +115,20 @@ class Gater_wool:
                                 t_name = i['queryName']
                                 if len(i['queryName']) < 5:  # 标题长度不得小于5个字
                                     logging('%s 标题长度小于5个字符---不符' % t_name)
-                                elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", t_name):  # 过滤特殊字符
+                                elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+",
+                                               t_name):  # 过滤特殊字符
                                     logging('%s 包含特殊字符---不符' % t_name)
+                                elif re.findall(re.compile(u"[\u3400-\u4db5]+"), t_name):
+                                    logging('%s 包含繁体字---不符' % t_name)
                                 else:
                                     task_name.append(t_name)
 
                         # 判断是否成功
                         if t_response_json['status']['code'] == 0:
-                            logging('%s 第 %s 页，获取任务名成功 %s' % (cid_name[cid], t_pn+1, response_json.get('status')))
+                            logging('%s 第 %s 页，获取任务名成功 %s' % (cid_name[cid], t_pn + 1, response_json.get('status')))
                         else:
-                            logging('%s 第 %s 页，获取任务名失败, 原因: %s' % (cid_name[cid], t_pn+1, response_json.get('status')))
+                            logging(
+                                '%s 第 %s 页，获取任务名失败, 原因: %s' % (cid_name[cid], t_pn + 1, response_json.get('status')))
                     t_pn += 1
                     time.sleep(1.5)
             total_name[cid_name[cid]] = task_name
@@ -217,8 +221,10 @@ class Gater_wool:
                     logging('%s 标题长度小于5个字符---不符' % name)
                 elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
                     logging('%s 包含特殊字符---不符' % name)
+                elif re.findall(re.compile(u"[\u3400-\u4db5]+"), name):
+                    logging('%s 包含繁体字---不符' % name)
                 else:
-                    prompt = f'以 {name} 为题，写一篇2000字的文章'
+                    prompt = f'以 {name} 为题，写一篇1000字的文章'
                     logging('第 %s 篇，【%s】 文章生成任务---开始' % (num, prompt))
                     try:
                         # Use the ChatGPT model to generate a response to a prompt
@@ -242,30 +248,33 @@ class Gater_wool:
                         break
                     num += 1
 
-    # def read_file(self):
-    #     """
-    #     测试使用
-    #     """
-    #     total_task_name = self.write_to_file()
-    #     a: list = []
-    #     b: dict = {}
-    #     for key, value in total_task_name.items():
-    #         for name in value:
-    #             if len(name) < 5:
-    #                 logging('%s 标题长度小于5个字符---不符' % name)
-    #             elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
-    #                 logging('%s 包含特殊字符---不符' % name)
-    #             else:
-    #                 a.append(name)
-    #         b[key] = a
-    #     task_info = b
-    #     f = open('../task/b.json', 'w', encoding='utf-8')
-    #     json.dump(task_info, f, ensure_ascii=False, indent=4)
-    #     logging('过滤成功!!!')
-    #     f.close()
+    def read_file(self):
+        """
+        测试使用
+        """
+        total_task_name = self.write_to_file()
+        a: list = []
+        b: dict = {}
+        for key, value in total_task_name.items():
+            for name in value:
+                if len(name) < 5:
+                    logging('%s 标题长度小于5个字符---不符' % name)
+                elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
+                    logging('%s 包含特殊字符---不符' % name)
+                elif re.findall(re.compile(u"[\u3400-\u4db5]+"), name):
+                    logging('%s 包含繁体字---不符' % name)
+                else:
+                    a.append(name)
+            b[key] = a
+        task_info = b
+        f = open('../task/b.json', 'w', encoding='utf-8')
+        json.dump(task_info, f, ensure_ascii=False, indent=4)
+        logging('过滤成功!!!')
+        f.close()
 
 
 if __name__ == '__main__':
     Gater_wool = Gater_wool()
     Gater_wool.completions_with_backoff()
+    # Gater_wool.write_to_file()
     # Gater_wool.read_file()
