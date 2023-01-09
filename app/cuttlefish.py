@@ -242,27 +242,27 @@ class Gater_wool:
                         break
                     num += 1
 
-    def read_file(self):
-        """
-        测试使用
-        """
-        total_task_name = self.write_to_file()
-        a: list = []
-        b: dict = {}
-        for key, value in total_task_name.items():
-            for name in value:
-                if len(name) < 5:
-                    logging('%s 标题长度小于5个字符---不符' % name)
-                elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
-                    logging('%s 包含特殊字符---不符' % name)
-                else:
-                    a.append(name)
-            b[key] = a
-        task_info = b
-        f = open('../task/b.json', 'w', encoding='utf-8')
-        json.dump(task_info, f, ensure_ascii=False, indent=4)
-        logging('过滤成功!!!')
-        f.close()
+    # def read_file(self):
+    #     """
+    #     测试使用
+    #     """
+    #     total_task_name = self.write_to_file()
+    #     a: list = []
+    #     b: dict = {}
+    #     for key, value in total_task_name.items():
+    #         for name in value:
+    #             if len(name) < 5:
+    #                 logging('%s 标题长度小于5个字符---不符' % name)
+    #             elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
+    #                 logging('%s 包含特殊字符---不符' % name)
+    #             else:
+    #                 a.append(name)
+    #         b[key] = a
+    #     task_info = b
+    #     f = open('../task/b.json', 'w', encoding='utf-8')
+    #     json.dump(task_info, f, ensure_ascii=False, indent=4)
+    #     logging('过滤成功!!!')
+    #     f.close()
 
 
 if __name__ == '__main__':
