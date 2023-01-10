@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 .docx
 task_name.json
+b.json
 # C extensions
 *.so
 

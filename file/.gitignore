@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 task_name.json
+b.json
 # C extensions
 *.so
 

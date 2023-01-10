@@ -60,6 +60,32 @@ def parseArgs():
     return args
 
 
+def traditional_chinese_check(chinese_char):
+    """
+    生僻字和繁体字过滤
+    使用 `in` 操作符判断中文字符是否存在于文件中
+    :return: true or false
+    """
+    with open('rc.txt', 'r', encoding='UTF-8') as f:
+        content = f.read()
+    flag = False
+    n = 0
+    while n < len(chinese_char):
+        for i in chinese_char:
+            if i in content:
+                flag = True
+                break
+            else:
+                flag = False
+                n += 1
+        if flag:
+            break
+    if flag:
+        return True
+    else:
+        return False
+
+
 class Gater_wool:
     """
     该死，就是想薅一把羊毛，行动起来
@@ -118,8 +144,8 @@ class Gater_wool:
                                 elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+",
                                                t_name):  # 过滤特殊字符
                                     logging('%s 包含特殊字符---不符' % t_name)
-                                elif re.findall(re.compile(u"[\u3400-\u4db5]+"), t_name):
-                                    logging('%s 包含繁体字---不符' % t_name)
+                                elif traditional_chinese_check(t_name):
+                                    logging('%s 包含繁体字和生僻字---不符' % t_name)
                                 else:
                                     task_name.append(t_name)
 
@@ -221,8 +247,8 @@ class Gater_wool:
                     logging('%s 标题长度小于5个字符---不符' % name)
                 elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
                     logging('%s 包含特殊字符---不符' % name)
-                elif re.findall(re.compile(u"[\u3400-\u4db5]+"), name):
-                    logging('%s 包含繁体字---不符' % name)
+                elif traditional_chinese_check(name):
+                    logging('%s 包含繁体字和生僻字---不符' % name)
                 else:
                     prompt = f'以 {name} 为题，写一篇1000字的文章'
                     logging('第 %s 篇，【%s】 文章生成任务---开始' % (num, prompt))
@@ -240,7 +266,7 @@ class Gater_wool:
                         content = response.choices[0].text
                         self.write_to_docx(classification=classification, title=name, content=content)
                         logging('第 %s 篇，【%s】docx文档---已生成' % (num, name))
-                        time.sleep(15)
+                        time.sleep(20)
                     except Exception as e:
                         logging('openai接口异常: %s' % e)
                     # 每天生成篇数限制
@@ -248,29 +274,29 @@ class Gater_wool:
                         break
                     num += 1
 
-    def read_file(self):
-        """
-        测试使用
-        """
-        total_task_name = self.write_to_file()
-        a: list = []
-        b: dict = {}
-        for key, value in total_task_name.items():
-            for name in value:
-                if len(name) < 5:
-                    logging('%s 标题长度小于5个字符---不符' % name)
-                elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
-                    logging('%s 包含特殊字符---不符' % name)
-                elif re.findall(re.compile(u"[\u3400-\u4db5]+"), name):
-                    logging('%s 包含繁体字---不符' % name)
-                else:
-                    a.append(name)
-            b[key] = a
-        task_info = b
-        f = open('../task/b.json', 'w', encoding='utf-8')
-        json.dump(task_info, f, ensure_ascii=False, indent=4)
-        logging('过滤成功!!!')
-        f.close()
+    # def read_file(self):
+    #     """
+    #     测试使用
+    #     """
+    #     total_task_name = self.write_to_file()
+    #     a: list = []
+    #     b: dict = {}
+    #     for key, value in total_task_name.items():
+    #         for name in value:
+    #             if len(name) < 5:
+    #                 logging('%s 标题长度小于5个字符---不符' % name)
+    #             elif re.search(r"[a-zA-Z0-9\*\"/:?\\|<>x×÷+“：《》～,，\-.()。\ ·_#$!%&@【】^{}~]+", name):
+    #                 logging('%s 包含特殊字符---不符' % name)
+    #             elif traditional_chinese_check(name):
+    #                 logging('%s 包含繁体字和生僻字---不符' % name)
+    #             else:
+    #                 a.append(name)
+    #         b[key] = a
+    #     task_info = b
+    #     f = open('../task/b.json', 'w', encoding='utf-8')
+    #     json.dump(task_info, f, ensure_ascii=False, indent=4)
+    #     logging('过滤成功!!!')
+    #     f.close()
 
 
 if __name__ == '__main__':
