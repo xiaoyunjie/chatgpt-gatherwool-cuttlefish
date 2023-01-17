@@ -3,6 +3,8 @@ Gather the wool from the cuttlefish
 
 ## 使用方法
 
+修改 openai.api_key 
+
 ```bash
 python cuttlefish.py -h  # help帮助
 ```
