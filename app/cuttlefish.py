@@ -210,7 +210,7 @@ class Gater_wool:
         # 二级标题
         head2 = document.add_heading(level=2)
         head2.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-        run = head2.add_run(u'第一章节')
+        run = head2.add_run(u'第一章')
         run.font.name = u'宋体'
         run.font.size = Pt(21)
         run.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
@@ -222,6 +222,20 @@ class Gater_wool:
         run = p.add_run(content)
         run.font.color.rgb = RGBColor(0, 0, 0)
         run.font.size = Pt(14)
+
+        # 附录
+        head3 = document.add_heading(level=2)
+        head2.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        run = head3.add_run(u'附录:')
+        run.font.name = u'宋体'
+        run.font.size = Pt(21)
+        run.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+        # 附录内容
+        p = document.add_paragraph()
+        run = p.add_run(u'无')
+        run.font.color.rgb = RGBColor(0, 0, 0)
+        run.font.size = Pt(14)
+
         # 单倍行距
         p.paragraph_format.line_spacing = Pt(30)
         # 段落后行距
